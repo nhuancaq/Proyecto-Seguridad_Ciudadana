@@ -164,6 +164,73 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad){
 }
 
 void modificarIncidente(Denuncia denuncias[], int cantidad){
+	cout << "\n=========================================\n";
+    cout << "         MODIFICAR INCIDENTE\n";
+    cout << "=========================================\n";
+
+    if (cantidad == 0) {
+        cout << "No hay incidentes registrados para modificar.\n";
+        return;
+    }
+
+    int codigoBusqueda;
+    cout << "Ingrese el codigo del incidente a modificar: ";
+    cin >> codigoBusqueda;
+
+    bool encontrado = false;
+
+    
+    for (int i = 0; i < cantidad; i++) {
+        if (denuncias[i].codigo == codigoBusqueda) {
+            encontrado = true;
+            
+            cout << "\n--- INCIDENTE ENCONTRADO ---\n";
+            cout << "Tipo: " << denuncias[i].tipo << " | Distrito actual: " << denuncias[i].distrito << "\n";
+            cout << "Estado actual: " << denuncias[i].estado << "\n";
+
+            int opcionMod;
+            cout << "\n¿Que dato desea actualizar?\n";
+            cout << "1. Estado (Pendiente, En investigacion, Resuelto)\n";
+            cout << "2. Descripcion\n";
+            cout << "3. Gravedad\n";
+            cout << "4. Distrito\n";
+            cout << "Seleccione una opcion: ";
+            cin >> opcionMod;
+
+            // Evaluamos qué quiere cambiar el usuario
+            switch (opcionMod) {
+                case 1:
+                    cout << "Nuevo estado: ";
+                    // Usamos cin >> ws para limpiar cualquier salto de línea residual
+                    getline(cin >> ws, denuncias[i].estado); 
+                    cout << "[!] Estado actualizado correctamente a: " << denuncias[i].estado << "\n";
+                    break;
+                case 2:
+                    cout << "Nueva descripcion: ";
+                    getline(cin >> ws, denuncias[i].descripcion);
+                    cout << "[!] Descripcion actualizada correctamente.\n";
+                    break;
+                case 3:
+                    cout << "Nueva gravedad (Bajo, Medio, Alto): ";
+                    getline(cin >> ws, denuncias[i].gravedad);
+                    cout << "[!] Gravedad actualizada correctamente.\n";
+                    break;
+                case 4:
+                    cout << "Nuevo distrito: ";
+                    getline(cin >> ws, denuncias[i].distrito);
+                    cout << "[!] Distrito actualizado correctamente.\n";
+                    break;
+                default:
+                    cout << "[!] Opcion invalida. No se realizaron cambios.\n";
+            }
+            break; 
+        }
+    }
+
+    
+    if (!encontrado) {
+        cout << "\n[!] Error: No se encontro ningun incidente con el codigo " << codigoBusqueda << ".\n";
+    }
 
 }
 

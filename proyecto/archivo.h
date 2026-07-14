@@ -1,10 +1,12 @@
 #ifndef ARCHIVO_H
 #define ARCHIVO_H
 
-// Funciones para el manejo del archivo de datos
+#include "denuncia.h"
 
-void guardarDatos();
+// Guarda todas las denuncias en datos.txt
+void guardarDatos(const Denuncia denuncias[], int cantidad);
 
-void cargarDatos();
+// Carga las denuncias desde datos.txt
+void cargarDatos(Denuncia denuncias[], int &cantidad);
 
 #endif

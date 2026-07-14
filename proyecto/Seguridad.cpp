@@ -1,4 +1,5 @@
 #include "seguridad.h"
+#include<iostream>
 using namespace std;
 
 void consejosSeguridad(){

@@ -40,6 +40,8 @@ void menu(){
 int main(){
 
     int opcion;
+    Denuncia listaDenuncias[100];
+    int cantidadActual = 0;
 
     do{
 
@@ -57,31 +59,31 @@ int main(){
 
             case 1:
 
-                registrarIncidente();
+                registrarIncidente(listaDenuncias, cantidadActual);
 
                 break;
 
             case 2:
 
-                mostrarIncidentes();
+                mostrarIncidentes(listaDenuncias, cantidadActual);
 
                 break;
 
             case 3:
 
-                buscarIncidente();
+                buscarIncidente(listaDenuncias, cantidadActual);
 
                 break;
 
             case 4:
 
-                modificarIncidente();
+                modificarIncidente(listaDenuncias, cantidadActual);
 
                 break;
 
             case 5:
 
-                eliminarIncidente();
+                eliminarIncidente(listaDenuncias, cantidadActual);
 
                 break;
 

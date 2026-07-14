@@ -235,5 +235,52 @@ void modificarIncidente(Denuncia denuncias[], int cantidad){
 }
 
 void eliminarIncidente(Denuncia denuncias[], int &cantidad){
+	
+	cout << "\n=========================================\n";
+    cout << "         ELIMINAR INCIDENTE\n";
+    cout << "=========================================\n";
+
+    if (cantidad == 0) {
+        cout << "No hay incidentes registrados para eliminar.\n";
+        return; 
+    }
+
+    int codigoBusqueda;
+    cout << "Ingrese el codigo del incidente a eliminar: ";
+    cin >> codigoBusqueda;
+
+    bool encontrado = false;
+    int posicion = -1; // Guardará el lugar exacto donde encontramos la denuncia
+
+    // buscamos en qué posicion esta la denuncia
+    for (int i = 0; i < cantidad; i++) {
+        if (denuncias[i].codigo == codigoBusqueda) {
+            encontrado = true;
+            posicion = i; // Guardamos la posición
+            break;
+        }
+    }
+
+    //Si la encontramos, procedemos a eliminarla
+    if (encontrado) {
+        char confirmacion;
+        cout << "\n[!] Se encontro el incidente: " << denuncias[posicion].tipo 
+             << " en " << denuncias[posicion].distrito << "\n";
+        cout << "Esta seguro que desea ELIMINARLO permanentemente? (S/N): ";
+        cin >> confirmacion;
+
+        if (confirmacion == 'S' || confirmacion == 's') {
+            for (int i = posicion; i < cantidad - 1; i++) {
+                denuncias[i] = denuncias[i + 1];
+            }
+            cantidad--;
+            cout << "\n[!] Incidente eliminado con exito.\n";
+            
+        } else {
+            cout << "\n[!] Operacion cancelada. El incidente esta a salvo.\n";
+        }
+    } else {
+        cout << "\n[!] Error: No se encontro ningun incidente con el codigo " << codigoBusqueda << ".\n";
+    }
 
 }

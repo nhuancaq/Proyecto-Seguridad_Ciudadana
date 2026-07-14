@@ -3,10 +3,11 @@
 
 #include "denuncia.h"
 #include "seguridad.h"
+#include "archivo.h"
 
 using namespace std;
 
-// Función que muestra el menú principal
+// Funciï¿½n que muestra el menï¿½ principal
 
 void menu(){
 
@@ -42,6 +43,8 @@ int main(){
     int opcion;
     Denuncia listaDenuncias[100];
     int cantidadActual = 0;
+
+    cargarDatos(listaDenuncias, cantidadActual);
 
     do{
 

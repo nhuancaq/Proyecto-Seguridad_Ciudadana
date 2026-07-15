@@ -10,32 +10,34 @@ void registrarIncidente(Denuncia denuncias[], int &cantidad) {
     cout << "          NUEVO REPORTE DE INCIDENTE\n";
     cout << "=========================================\n";
     
-    // --- INICIO DE LA ADVERTENCIA LEGAL ---
-    cout << "\n[ ADVERTENCIA IMPORTANTE ]\n";
-    cout << "Este formulario tiene caracter de denuncia oficial. El registro de\n";
-    cout << "incidentes falsos, difamatorios o realizados de mala fe con el fin\n";
-    cout << "de perjudicar a terceros esta sujeto a severas sanciones legales.\n";
-    cout << "Por favor, utilice esta herramienta con total responsabilidad.\n";
+    // --- INICIO DEL PROTOCOLO POLICIAL ---
+    cout << "\n[ PROTOCOLO DE REGISTRO OFICIAL ]\n";
+    cout << "ATENCION: Como agente operador, lea la siguiente advertencia al ciudadano:\n";
+    cout << "-----------------------------------------------------------------------\n";
+    cout << "\"Le informamos que este formulario tiene caracter de denuncia oficial.\n";
+    cout << "El registro de incidentes falsos, difamatorios o realizados de mala fe\n";
+    cout << "esta sujeto a severas sanciones legales segun el Codigo Penal.\"\n";
+    cout << "-----------------------------------------------------------------------\n";
     
     char confirmacion;
-    cout << "\n¿Comprende esta advertencia y desea continuar con el registro? (S/N): ";
+    cout << "\n¿El ciudadano comprende la advertencia y confirma su declaracion? (S/N): ";
     cin >> confirmacion;
     
-    // Limpiamos el buffer para evitar el famoso problema del "Enter fantasma"
+    // Limpiamos el buffer para evitar el "Enter fantasma"
     cin.ignore(); 
 
     if (confirmacion != 'S' && confirmacion != 's') {
-        cout << "\n[!] Operacion cancelada. Volviendo al menu principal...\n";
-        return; // Esto expulsa al usuario de la función y cancela el registro
+        cout << "\n[!] Operacion abortada por negativa del ciudadano. Volviendo al menu...\n";
+        return; // Esto expulsa al policía de la función y cancela el registro
     }
-    // --- FIN DE LA ADVERTENCIA ---
+    // --- FIN DEL PROTOCOLO POLICIAL ---
 
     denuncias[cantidad].codigo = cantidad + 1; 
 
-    cout << "\nNombre del denunciante (Opcional): ";
+    cout << "\nNombre del denunciante : ";
     getline(cin >> ws, denuncias[cantidad].nombre);
 
-    cout << "DNI (Opcional): ";
+    cout << "DNI: ";
     getline(cin, denuncias[cantidad].dni);
 
     cout << "Tipo de incidente (Robo, Asalto, Hurto, Violencia, Vandalismo, Otro): ";
@@ -59,14 +61,15 @@ void registrarIncidente(Denuncia denuncias[], int &cantidad) {
     cout << "Nivel de gravedad (Bajo, Medio, Alto): ";
     getline(cin, denuncias[cantidad].gravedad);
 
-    denuncias[cantidad].estado = "Pendiente";
+    denuncias[cantidad].estado = "En investigacion"; // Ahora el caso inicia como "En investigación" por la policía
 
     cantidad++; 
 
     // Se guarda la nueva información en el TXT
     guardarDatos(denuncias, cantidad);
 
-    cout << "\n[!] Incidente registrado. Codigo de caso: " << denuncias[cantidad-1].codigo << "\n";
+    cout << "\n[!] Incidente registrado exitosamente en el sistema policial.\n";
+    cout << "[!] Codigo oficial de caso asignado: " << denuncias[cantidad-1].codigo << "\n";
 }
 
 void mostrarIncidentes(const Denuncia denuncias[], int cantidad) {

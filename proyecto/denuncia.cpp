@@ -1,9 +1,12 @@
 #include <iostream>
 #include <string>
 #include "denuncia.h"
+#include "archivo.h" // Vital para poder guardar
+
 using namespace std;
-void registrarIncidente(Denuncia denuncias[], int &cantidad){
-	cout << "\n=========================================\n";
+
+void registrarIncidente(Denuncia denuncias[], int &cantidad) {
+    cout << "\n=========================================\n";
     cout << "          NUEVO REPORTE DE INCIDENTE\n";
     cout << "=========================================\n";
     
@@ -36,25 +39,26 @@ void registrarIncidente(Denuncia denuncias[], int &cantidad){
     cout << "Nivel de gravedad (Bajo, Medio, Alto): ";
     getline(cin, denuncias[cantidad].gravedad);
 
-    denuncias[cantidad].estado = "Pendiente"; // El caso inicia como pendiente
+    denuncias[cantidad].estado = "Pendiente";
 
-    cantidad++; // Aumenta el contador de denuncias
+    cantidad++; 
+
+    // ¡Excelente! Aquí se guarda la nueva información en el TXT
+    guardarDatos(denuncias, cantidad);
 
     cout << "\n[!] Incidente registrado. Codigo de caso: " << denuncias[cantidad-1].codigo << "\n";
-
 }
 
-void mostrarIncidentes(const Denuncia denuncias[], int cantidad){
-	cout << "\n=========================================================\n";
+void mostrarIncidentes(const Denuncia denuncias[], int cantidad) {
+    cout << "\n=========================================================\n";
     cout << "              LISTA DE INCIDENTES REGISTRADOS\n";
     cout << "=========================================================\n";
     
     if (cantidad == 0) {
         cout << "No hay incidentes registrados en el sistema.\n";
-        return; // Detiene la función si no hay nada que mostrar
+        return; 
     }
 
-    // Bucle para imprimir todas las denuncias guardadas
     for (int i = 0; i < cantidad; i++) {
         cout << "Codigo: " << denuncias[i].codigo << " | Tipo: " << denuncias[i].tipo << "\n";
         cout << "Distrito: " << denuncias[i].distrito << " | Fecha: " << denuncias[i].fecha << "\n";
@@ -62,12 +66,10 @@ void mostrarIncidentes(const Denuncia denuncias[], int cantidad){
         cout << "Descripcion: " << denuncias[i].descripcion << "\n";
         cout << "---------------------------------------------------------\n";
     }
-
 }
 
-void buscarIncidente(const Denuncia denuncias[], int cantidad){
-	
-	cout << "\n=========================================\n";
+void buscarIncidente(const Denuncia denuncias[], int cantidad) {
+    cout << "\n=========================================\n";
     cout << "           BUSCAR INCIDENTE\n";
     cout << "=========================================\n";
 
@@ -85,7 +87,6 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad){
     cout << "Seleccione una opcion: ";
     cin >> opcionBusqueda;
     
-    
     cin.ignore(); 
 
     bool encontrado = false; 
@@ -95,6 +96,7 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad){
             int codigoBusqueda;
             cout << "\nIngrese el codigo del incidente: ";
             cin >> codigoBusqueda;
+            cin.ignore();
 
             for (int i = 0; i < cantidad; i++) {
                 if (denuncias[i].codigo == codigoBusqueda) {
@@ -112,11 +114,12 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad){
         case 2: {
             string distritoBusqueda;
             cout << "\nIngrese el distrito a buscar: ";
-            getline(cin, distritoBusqueda);
+            getline(cin >> ws, distritoBusqueda); // Limpia espacios basura iniciales
 
             cout << "\n--- RESULTADOS EN " << distritoBusqueda << " ---\n";
             for (int i = 0; i < cantidad; i++) {
-                if (denuncias[i].distrito == distritoBusqueda) {
+                // Buscamos si el distrito guardado CONTIENE lo que el usuario escribió
+                if (denuncias[i].distrito.find(distritoBusqueda) != string::npos) {
                     cout << "Codigo [" << denuncias[i].codigo << "] - " << denuncias[i].tipo << " - Fecha: " << denuncias[i].fecha << "\n";
                     encontrado = true;
                 }
@@ -126,11 +129,11 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad){
         case 3: {
             string tipoBusqueda;
             cout << "\nIngrese el tipo de delito (Robo, Asalto, etc.): ";
-            getline(cin, tipoBusqueda);
+            getline(cin >> ws, tipoBusqueda);
 
             cout << "\n--- RESULTADOS PARA " << tipoBusqueda << " ---\n";
             for (int i = 0; i < cantidad; i++) {
-                if (denuncias[i].tipo == tipoBusqueda) {
+                if (denuncias[i].tipo.find(tipoBusqueda) != string::npos) {
                     cout << "Codigo [" << denuncias[i].codigo << "] - Distrito: " << denuncias[i].distrito << " - Fecha: " << denuncias[i].fecha << "\n";
                     encontrado = true;
                 }
@@ -140,11 +143,12 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad){
         case 4: {
             string fechaBusqueda;
             cout << "\nIngrese la fecha a buscar (DD/MM/AAAA): ";
-            getline(cin, fechaBusqueda);
+            getline(cin >> ws, fechaBusqueda);
 
             cout << "\n--- RESULTADOS DEL " << fechaBusqueda << " ---\n";
             for (int i = 0; i < cantidad; i++) {
-                if (denuncias[i].fecha == fechaBusqueda) {
+                // La magia: Si hay espacios basura al final de la fecha guardada, los ignora
+                if (denuncias[i].fecha.find(fechaBusqueda) != string::npos) {
                     cout << "Codigo [" << denuncias[i].codigo << "] - " << denuncias[i].tipo << " - Distrito: " << denuncias[i].distrito << "\n";
                     encontrado = true;
                 }
@@ -156,15 +160,13 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad){
             return;
     }
 
-    
     if (!encontrado) {
         cout << "\n[!] No se encontraron incidentes que coincidan con su busqueda.\n";
     }
-
 }
 
-void modificarIncidente(Denuncia denuncias[], int cantidad){
-	cout << "\n=========================================\n";
+void modificarIncidente(Denuncia denuncias[], int cantidad) {
+    cout << "\n=========================================\n";
     cout << "         MODIFICAR INCIDENTE\n";
     cout << "=========================================\n";
 
@@ -176,10 +178,10 @@ void modificarIncidente(Denuncia denuncias[], int cantidad){
     int codigoBusqueda;
     cout << "Ingrese el codigo del incidente a modificar: ";
     cin >> codigoBusqueda;
+    cin.ignore();
 
     bool encontrado = false;
 
-    
     for (int i = 0; i < cantidad; i++) {
         if (denuncias[i].codigo == codigoBusqueda) {
             encontrado = true;
@@ -197,11 +199,9 @@ void modificarIncidente(Denuncia denuncias[], int cantidad){
             cout << "Seleccione una opcion: ";
             cin >> opcionMod;
 
-            // Evaluamos qué quiere cambiar el usuario
             switch (opcionMod) {
                 case 1:
                     cout << "Nuevo estado: ";
-                    // Usamos cin >> ws para limpiar cualquier salto de línea residual
                     getline(cin >> ws, denuncias[i].estado); 
                     cout << "[!] Estado actualizado correctamente a: " << denuncias[i].estado << "\n";
                     break;
@@ -223,20 +223,21 @@ void modificarIncidente(Denuncia denuncias[], int cantidad){
                 default:
                     cout << "[!] Opcion invalida. No se realizaron cambios.\n";
             }
+
+            // ¡Excelente! Guarda el cambio en el TXT
+            guardarDatos(denuncias, cantidad);
+
             break; 
         }
     }
 
-    
     if (!encontrado) {
         cout << "\n[!] Error: No se encontro ningun incidente con el codigo " << codigoBusqueda << ".\n";
     }
-
 }
 
-void eliminarIncidente(Denuncia denuncias[], int &cantidad){
-	
-	cout << "\n=========================================\n";
+void eliminarIncidente(Denuncia denuncias[], int &cantidad) {
+    cout << "\n=========================================\n";
     cout << "         ELIMINAR INCIDENTE\n";
     cout << "=========================================\n";
 
@@ -250,30 +251,33 @@ void eliminarIncidente(Denuncia denuncias[], int &cantidad){
     cin >> codigoBusqueda;
 
     bool encontrado = false;
-    int posicion = -1; // Guardará el lugar exacto donde encontramos la denuncia
+    int posicion = -1; 
 
-    // buscamos en qué posicion esta la denuncia
     for (int i = 0; i < cantidad; i++) {
         if (denuncias[i].codigo == codigoBusqueda) {
             encontrado = true;
-            posicion = i; // Guardamos la posición
+            posicion = i; 
             break;
         }
     }
 
-    //Si la encontramos, procedemos a eliminarla
     if (encontrado) {
         char confirmacion;
         cout << "\n[!] Se encontro el incidente: " << denuncias[posicion].tipo 
              << " en " << denuncias[posicion].distrito << "\n";
         cout << "Esta seguro que desea ELIMINARLO permanentemente? (S/N): ";
         cin >> confirmacion;
+        cin.ignore();
 
         if (confirmacion == 'S' || confirmacion == 's') {
             for (int i = posicion; i < cantidad - 1; i++) {
                 denuncias[i] = denuncias[i + 1];
             }
             cantidad--;
+
+            // ¡Excelente! Actualiza el TXT sin la denuncia borrada
+            guardarDatos(denuncias, cantidad);
+
             cout << "\n[!] Incidente eliminado con exito.\n";
             
         } else {
@@ -282,5 +286,4 @@ void eliminarIncidente(Denuncia denuncias[], int &cantidad){
     } else {
         cout << "\n[!] Error: No se encontro ningun incidente con el codigo " << codigoBusqueda << ".\n";
     }
-
 }

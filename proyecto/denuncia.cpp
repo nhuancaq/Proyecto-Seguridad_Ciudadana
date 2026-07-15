@@ -1,9 +1,52 @@
 #include <iostream>
 #include <string>
+#include <cctype>
+#include <algorithm>
 #include "denuncia.h"
 #include "archivo.h" // Vital para poder guardar
 
 using namespace std;
+
+// --- FUNCIONES AUXILIARES DE VALIDACIÓN Y LIMPIEZA ---
+
+// Convierte un texto a minúsculas y elimina espacios extras para evitar errores de tipeo
+string limpiarTexto(string str) {
+    // Eliminar espacios al inicio y final si los hubiera
+    size_t start = str.find_first_not_of(" \t\n\r");
+    if (string::npos == start) return "";
+    size_t end = str.find_last_not_of(" \t\n\r");
+    str = str.substr(start, (end - start + 1));
+
+    // Convertir todo a minúsculas
+    for (char &c : str) {
+        c = tolower(static_cast<unsigned char>(c));
+    }
+    return str;
+}
+
+// Revisa que una cadena solo contenga letras, espacios y tildes/ñ
+bool esSoloLetras(const string &str) {
+    if (str.empty()) return false;
+    for (char c : str) {
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (!isalpha(uc) && uc != ' ' && uc != 'á' && uc != 'é' && uc != 'í' && uc != 'ó' && uc != 'ú' && 
+            uc != 'Á' && uc != 'É' && uc != 'Í' && uc != 'Ó' && uc != 'Ú' && uc != 'ñ' && uc != 'Ñ') {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Revisa que una cadena contenga exclusivamente números (para el DNI)
+bool esSoloNumeros(const string &str) {
+    if (str.empty()) return false;
+    for (char c : str) {
+        if (!isdigit(static_cast<unsigned char>(c))) return false;
+    }
+    return true;
+}
+
+// ------------------------------------------
 
 void registrarIncidente(Denuncia denuncias[], int &cantidad) {
     
@@ -25,27 +68,40 @@ void registrarIncidente(Denuncia denuncias[], int &cantidad) {
     cout << "-----------------------------------------------------------------------\n";
     
     char confirmacion;
-    cout << "\n¿El ciudadano comprende la advertencia y confirma su declaracion? (S/N): ";
-    cin >> confirmacion;
-    cin.ignore(10000, '\n'); 
+    do {
+        cout << "\n¿El ciudadano comprende la advertencia y confirma su declaracion? (S/N): ";
+        cin >> confirmacion;
+        cin.ignore(10000, '\n'); 
 
-    if (confirmacion != 'S' && confirmacion != 's') {
+        if (confirmacion != 'S' && confirmacion != 's' && confirmacion != 'N' && confirmacion != 'n') {
+            cout << "[!] Error: Ingrese unicamente 'S' para confirmar o 'N' para cancelar.\n";
+        }
+    } while (confirmacion != 'S' && confirmacion != 's' && confirmacion != 'N' && confirmacion != 'n');
+
+    if (confirmacion == 'N' || confirmacion == 'n') {
         cout << "\n[!] Operacion abortada por negativa del ciudadano. Volviendo al menu...\n";
         return; 
     }
 
     denuncias[cantidad].codigo = cantidad + 1; 
 
-    // Campos de texto blindados contra vacíos
+    // Validación estricta para el Nombre (Solo letras, sin números)
     do {
-        cout << "\nNombre del denunciante : ";
+        cout << "\nNombre del denunciante (Solo letras): ";
         getline(cin >> ws, denuncias[cantidad].nombre);
-    } while (denuncias[cantidad].nombre.empty());
+        if (!esSoloLetras(denuncias[cantidad].nombre)) {
+            cout << "[!] Error: El nombre no puede contener numeros ni caracteres especiales.\n";
+        }
+    } while (!esSoloLetras(denuncias[cantidad].nombre));
 
+    // Validación estricta para el DNI (Exactamente 8 dígitos numéricos)
     do {
-        cout << "DNI: ";
+        cout << "DNI (Exactamente 8 numeros): ";
         getline(cin >> ws, denuncias[cantidad].dni);
-    } while (denuncias[cantidad].dni.empty());
+        if (!esSoloNumeros(denuncias[cantidad].dni) || denuncias[cantidad].dni.length() != 8) {
+            cout << "[!] Error: El DNI debe contener unicamente 8 digitos numericos.\n";
+        }
+    } while (!esSoloNumeros(denuncias[cantidad].dni) || denuncias[cantidad].dni.length() != 8);
 
     do {
         cout << "Tipo de incidente (Robo, Asalto, Hurto, Violencia, Vandalismo, Otro): ";
@@ -79,20 +135,27 @@ void registrarIncidente(Denuncia denuncias[], int &cantidad) {
         getline(cin >> ws, denuncias[cantidad].descripcion);
     } while (denuncias[cantidad].descripcion.empty());
 
-    // Mejora anti-minúsculas en Gravedad
+    // Validación de Gravedad flexible a mayúsculas/minúsculas y espacios
     do {
+        string entradaGravedad;
         cout << "Nivel de gravedad (Bajo, Medio, Alto): ";
-        getline(cin >> ws, denuncias[cantidad].gravedad);
+        getline(cin >> ws, entradaGravedad);
         
-        // Traductor automático
-        if (denuncias[cantidad].gravedad == "bajo") denuncias[cantidad].gravedad = "Bajo";
-        else if (denuncias[cantidad].gravedad == "medio") denuncias[cantidad].gravedad = "Medio";
-        else if (denuncias[cantidad].gravedad == "alto") denuncias[cantidad].gravedad = "Alto";
+        string gravedadLimpia = limpiarTexto(entradaGravedad);
 
-        if(denuncias[cantidad].gravedad != "Bajo" && denuncias[cantidad].gravedad != "Medio" && denuncias[cantidad].gravedad != "Alto"){
+        if (gravedadLimpia == "bajo") {
+            denuncias[cantidad].gravedad = "Bajo";
+            break;
+        } else if (gravedadLimpia == "medio") {
+            denuncias[cantidad].gravedad = "Medio";
+            break;
+        } else if (gravedadLimpia == "alto") {
+            denuncias[cantidad].gravedad = "Alto";
+            break;
+        } else {
             cout << "[!] Error: Por favor, ingrese exactamente: Bajo, Medio o Alto.\n";
         }
-    } while (denuncias[cantidad].gravedad != "Bajo" && denuncias[cantidad].gravedad != "Medio" && denuncias[cantidad].gravedad != "Alto");
+    } while (true);
 
     denuncias[cantidad].estado = "En investigacion"; 
 
@@ -139,14 +202,20 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad) {
     cout << "2. Buscar por Distrito\n";
     cout << "3. Buscar por Tipo de delito\n";
     cout << "4. Buscar por Fecha\n";
-    cout << "Seleccione una opcion: ";
+    cout << "Seleccione una opcion (1-4): ";
     
-    while (!(cin >> opcionBusqueda)) {
-        cin.clear();
+    do {
+        while (!(cin >> opcionBusqueda)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "[!] Error: Ingrese unicamente un numero valido del menu (1-4): ";
+        }
         cin.ignore(10000, '\n');
-        cout << "[!] Error: Opcion invalida. Ingrese solo numeros: ";
-    }
-    cin.ignore(10000, '\n'); 
+
+        if (opcionBusqueda < 1 || opcionBusqueda > 4) {
+            cout << "[!] Opcion fuera de rango. Seleccione una opcion valida (1-4): ";
+        }
+    } while (opcionBusqueda < 1 || opcionBusqueda > 4);
 
     bool encontrado = false; 
 
@@ -217,9 +286,6 @@ void buscarIncidente(const Denuncia denuncias[], int cantidad) {
             }
             break;
         }
-        default:
-            cout << "[!] Opcion de busqueda no valida.\n";
-            return;
     }
 
     if (!encontrado) {
@@ -263,30 +329,43 @@ void modificarIncidente(Denuncia denuncias[], int cantidad) {
             cout << "2. Descripcion\n";
             cout << "3. Gravedad\n";
             cout << "4. Distrito\n";
-            cout << "Seleccione una opcion: ";
+            cout << "Seleccione una opcion (1-4): ";
             
-            while (!(cin >> opcionMod)) {
-                cin.clear();
+            do {
+                while (!(cin >> opcionMod)) {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cout << "[!] Error: Ingrese unicamente un numero valido del menu (1-4): ";
+                }
                 cin.ignore(10000, '\n');
-                cout << "[!] Error: Opcion invalida. Ingrese solo numeros: ";
-            }
-            cin.ignore(10000, '\n');
+
+                if (opcionMod < 1 || opcionMod > 4) {
+                    cout << "[!] Opcion fuera de rango. Seleccione una opcion valida (1-4): ";
+                }
+            } while (opcionMod < 1 || opcionMod > 4);
 
             switch (opcionMod) {
                 case 1:
                     do {
+                        string entradaEstado;
                         cout << "Nuevo estado (En investigacion, Resuelto, Archivado): ";
-                        getline(cin >> ws, denuncias[i].estado);
+                        getline(cin >> ws, entradaEstado);
                         
-                        // Mejora anti-minúsculas en Estado
-                        if (denuncias[i].estado == "en investigacion") denuncias[i].estado = "En investigacion";
-                        else if (denuncias[i].estado == "resuelto") denuncias[i].estado = "Resuelto";
-                        else if (denuncias[i].estado == "archivado") denuncias[i].estado = "Archivado";
+                        string estadoLimpio = limpiarTexto(entradaEstado);
 
-                        if(denuncias[i].estado != "En investigacion" && denuncias[i].estado != "Resuelto" && denuncias[i].estado != "Archivado"){
+                        if (estadoLimpio == "en investigacion") {
+                            denuncias[i].estado = "En investigacion";
+                            break;
+                        } else if (estadoLimpio == "resuelto") {
+                            denuncias[i].estado = "Resuelto";
+                            break;
+                        } else if (estadoLimpio == "archivado") {
+                            denuncias[i].estado = "Archivado";
+                            break;
+                        } else {
                             cout << "[!] Error: Ingrese un estado valido policial (En investigacion, Resuelto o Archivado).\n";
                         }
-                    } while (denuncias[i].estado != "En investigacion" && denuncias[i].estado != "Resuelto" && denuncias[i].estado != "Archivado");
+                    } while (true);
                     cout << "[!] Estado actualizado correctamente a: " << denuncias[i].estado << "\n";
                     break;
                 case 2:
@@ -298,18 +377,25 @@ void modificarIncidente(Denuncia denuncias[], int cantidad) {
                     break;
                 case 3:
                     do {
+                        string entradaGravedad;
                         cout << "Nueva gravedad (Bajo, Medio, Alto): ";
-                        getline(cin >> ws, denuncias[i].gravedad);
+                        getline(cin >> ws, entradaGravedad);
                         
-                        // Mejora anti-minúsculas en Gravedad
-                        if (denuncias[i].gravedad == "bajo") denuncias[i].gravedad = "Bajo";
-                        else if (denuncias[i].gravedad == "medio") denuncias[i].gravedad = "Medio";
-                        else if (denuncias[i].gravedad == "alto") denuncias[i].gravedad = "Alto";
+                        string gravedadLimpia = limpiarTexto(entradaGravedad);
 
-                        if(denuncias[i].gravedad != "Bajo" && denuncias[i].gravedad != "Medio" && denuncias[i].gravedad != "Alto"){
+                        if (gravedadLimpia == "bajo") {
+                            denuncias[i].gravedad = "Bajo";
+                            break;
+                        } else if (gravedadLimpia == "medio") {
+                            denuncias[i].gravedad = "Medio";
+                            break;
+                        } else if (gravedadLimpia == "alto") {
+                            denuncias[i].gravedad = "Alto";
+                            break;
+                        } else {
                             cout << "[!] Error: Por favor, ingrese exactamente: Bajo, Medio o Alto.\n";
                         }
-                    } while (denuncias[i].gravedad != "Bajo" && denuncias[i].gravedad != "Medio" && denuncias[i].gravedad != "Alto");
+                    } while (true);
                     cout << "[!] Gravedad actualizada correctamente a: " << denuncias[i].gravedad << "\n";
                     break;
                 case 4:
@@ -319,8 +405,6 @@ void modificarIncidente(Denuncia denuncias[], int cantidad) {
                     } while(denuncias[i].distrito.empty());
                     cout << "[!] Distrito actualizado correctamente.\n";
                     break;
-                default:
-                    cout << "[!] Opcion invalida. No se realizaron cambios.\n";
             }
 
             guardarDatos(denuncias, cantidad);

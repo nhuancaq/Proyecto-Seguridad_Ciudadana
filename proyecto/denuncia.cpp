@@ -10,9 +10,29 @@ void registrarIncidente(Denuncia denuncias[], int &cantidad) {
     cout << "          NUEVO REPORTE DE INCIDENTE\n";
     cout << "=========================================\n";
     
+    // --- INICIO DE LA ADVERTENCIA LEGAL ---
+    cout << "\n[ ADVERTENCIA IMPORTANTE ]\n";
+    cout << "Este formulario tiene caracter de denuncia oficial. El registro de\n";
+    cout << "incidentes falsos, difamatorios o realizados de mala fe con el fin\n";
+    cout << "de perjudicar a terceros esta sujeto a severas sanciones legales.\n";
+    cout << "Por favor, utilice esta herramienta con total responsabilidad.\n";
+    
+    char confirmacion;
+    cout << "\n¿Comprende esta advertencia y desea continuar con el registro? (S/N): ";
+    cin >> confirmacion;
+    
+    // Limpiamos el buffer para evitar el famoso problema del "Enter fantasma"
+    cin.ignore(); 
+
+    if (confirmacion != 'S' && confirmacion != 's') {
+        cout << "\n[!] Operacion cancelada. Volviendo al menu principal...\n";
+        return; // Esto expulsa al usuario de la función y cancela el registro
+    }
+    // --- FIN DE LA ADVERTENCIA ---
+
     denuncias[cantidad].codigo = cantidad + 1; 
 
-    cout << "Nombre del denunciante (Opcional): ";
+    cout << "\nNombre del denunciante (Opcional): ";
     getline(cin >> ws, denuncias[cantidad].nombre);
 
     cout << "DNI (Opcional): ";
@@ -43,7 +63,7 @@ void registrarIncidente(Denuncia denuncias[], int &cantidad) {
 
     cantidad++; 
 
-    // ¡Excelente! Aquí se guarda la nueva información en el TXT
+    // Se guarda la nueva información en el TXT
     guardarDatos(denuncias, cantidad);
 
     cout << "\n[!] Incidente registrado. Codigo de caso: " << denuncias[cantidad-1].codigo << "\n";
